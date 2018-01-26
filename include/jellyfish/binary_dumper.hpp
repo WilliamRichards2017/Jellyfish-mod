@@ -19,6 +19,7 @@
 
 #include <iostream>
 #include <cmath>
+#include <string>
 
 #include <jellyfish/sorted_dumper.hpp>
 
@@ -97,15 +98,24 @@ class binary_reader {
   const size_t                  size_mask_;
 
 public:
-  binary_reader(std::istream& is, // stream containing data (past any header)
+  std::string file_;
+    binary_reader(std::istream& is, // stream containing data (past any header)
                 file_header* header) :  // header which contains counter_len, matrix, size and key_len
     is_(is), val_len_(header->counter_len()), key_(header->key_len() / 2),
     m_(header->matrix()),
     size_mask_(header->size() - 1)
+    { }
+
+  binary_reader(std::istream& is,file_header* header, std::string file) :  // header which contains counter_len, matrix, size and key_len                                                                                                    
+    is_(is), val_len_(header->counter_len()), key_(header->key_len() / 2),
+    m_(header->matrix()),
+    size_mask_(header->size() - 1),
+    file_(file)
   { }
 
   const Key& key() const { return key_; }
   const Val& val() const { return val_; }
+  std::string file() const {return file_; }
   size_t pos() const { return m_.times(key_) & size_mask_; }
 
   bool next() {

@@ -43,10 +43,13 @@ namespace jellyfish {
 /// current time, the current working directory and the path to the
 /// executable.
 class generic_file_header {
+public:
+  std::string file_;
 protected:
   static const int MAX_HEADER_DIGITS = 9;
   Json::Value      root_;
-  size_t           offset_;     // Nb of bytes past header
+  size_t           offset_;// Nb of bytes past header
+
 
   struct buffer {
     char* data;

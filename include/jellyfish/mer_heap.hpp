@@ -26,10 +26,11 @@ struct heap_item {
   Key       key_;
   uint64_t  val_;
   uint64_t  pos_;
+  std::string file_;
   Iterator* it_;
 
   heap_item() : it_(0) { }
-  heap_item(Iterator& iter) : key_(iter.key()), val_(iter.val()), pos_(iter.pos()), it_(&iter) { }
+  heap_item(Iterator& iter) : key_(iter.key()), val_(iter.val()), pos_(iter.pos()), it_(&iter), file_(iter.file_) { }
 
   bool operator>(const heap_item& other) const {
     if(pos_ == other.pos_)

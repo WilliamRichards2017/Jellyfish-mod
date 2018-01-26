@@ -18,6 +18,7 @@
 #define __JELLYFISH_TEXT_DUMPER_HPP__
 
 #include <jellyfish/sorted_dumper.hpp>
+#include <string>
 
 namespace jellyfish {
 template<typename Key, typename Val>
@@ -65,6 +66,7 @@ class text_reader {
   const size_t                  size_mask_;
 
 public:
+  std::string file_;
   text_reader(std::istream& is,
               file_header* header) :
     is_(is),
@@ -76,6 +78,11 @@ public:
 
   const Key& key() const { return key_; }
   const Val& val() const { return val_; }
+  const std::string file() { 
+    file_ = "testy";
+    return file_;
+  }
+
   size_t pos() const { return m_.times(key()) & size_mask_; }
 
   bool next() {

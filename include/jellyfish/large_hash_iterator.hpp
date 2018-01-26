@@ -19,6 +19,7 @@
 
 #include <iterator>
 #include <utility>
+#include <string>
 
 /// Various iterators for the large hash array
 
@@ -129,6 +130,9 @@ class region_iterator_base {
   typedef typename array::key_status  key_status;
   typedef typename array::data_word   word;
   typedef typename array::offset_t    offset_t;
+  std::string file_ = "large_hash_iterator";
+  
+
 
 protected:
   const array*    ary_;
@@ -182,6 +186,11 @@ public:
   uint64_t pos() const{
     return oid_;
   }
+
+  std::string file() const {
+    std::string test = "hash_iterator";
+    return test;
+    }
 
   size_t start() { return start_id_; }
   size_t end() { return end_id_; }

@@ -38,6 +38,7 @@ using jellyfish::cpp_array;
 typedef std::auto_ptr<binary_reader> binary_reader_ptr;
 typedef std::auto_ptr<text_reader> text_reader_ptr;
 
+
 struct file_info {
   std::ifstream is;
   file_header   header;
@@ -51,7 +52,7 @@ typedef std::auto_ptr<RectangularBinaryMatrix> matrix_ptr;
 
 template<typename reader_type, typename writer_type>
 void do_merge(cpp_array<file_info>& files, std::ostream& out, writer_type& writer,
-              uint64_t min, uint64_t max) {
+              uint64_t min, uint64_t max, std::vector<const char*> input_files) {
   cpp_array<reader_type> readers(files.size());
   typedef jellyfish::mer_heap::heap<mer_dna, reader_type> heap_type;
   typedef typename heap_type::const_item_t heap_item;
@@ -59,8 +60,16 @@ void do_merge(cpp_array<file_info>& files, std::ostream& out, writer_type& write
 
   for(size_t i = 0; i < files.size(); ++i) {
     readers.init(i, files[i].is, &files[i].header);
-    if(readers[i].next())
+    //std::cout << "input file is: " << input_files[i] << "\n";
+
+
+
+    if(readers[i].next()){
+      readers[i].file_ = input_files[i];
+      std::cout << "printing readers[i].file_: " << readers[i].file_ << "\n";
+      std::cout << "files[i].is: " << files[i].is << "  &files[i].header is: " << files[i].header << "File origin is: " << readers[i].file_ << "\n";
       heap.push(readers[i]);
+    }
   }
 
   heap_item head = heap.head();
@@ -69,14 +78,17 @@ void do_merge(cpp_array<file_info>& files, std::ostream& out, writer_type& write
     key = head->key_;
     uint64_t sum = 0;
     do {
+      std::cout << " testy file is: " << head->file_ << "   ";
       sum += head->val_;
       heap.pop();
       if(head->it_->next())
         heap.push(*head->it_);
       head = heap.head();
     } while(head->key_ == key && heap.is_not_empty());
-    if(sum >= min && sum <= max)
+    if(sum >= min && sum <= max) {
+      std::cout << "key is: " << key << " , sum is: " << sum << "value is " << head->val_ <<  "\n";
       writer.write(out, key, sum);
+    }
   }
 }
 
@@ -91,16 +103,19 @@ void merge_files(std::vector<const char*> input_files,
   unsigned int out_counter_len    = std::numeric_limits<unsigned int>::max();
   std::string  format;
   matrix_ptr   matrix;
+  std::string file;
 
   cpp_array<file_info> files(input_files.size());
 
   // create an iterator for each hash file
   for(size_t i = 0; i < files.size(); i++) {
     files.init(i, input_files[i]);
+    //std::cout << "input file is: " << input_files[i] << "\n";
     if(!files[i].is.good())
       throw MergeError(err::msg() << "Failed to open input file '" << input_files[i] << "'");
 
     file_header& h = files[i].header;
+    h.file_ = input_files[i];
     if(i == 0) {
       key_len            = h.key_len();
       max_reprobe_offset = h.max_reprobe_offset();
@@ -139,11 +154,11 @@ void merge_files(std::vector<const char*> input_files,
     out_header.counter_len(out_counter_len);
     out_header.write(out);
     binary_writer writer(out_counter_len, key_len);
-    do_merge<binary_reader, binary_writer>(files, out, writer, min, max);
+    do_merge<binary_reader, binary_writer>(files, out, writer, min, max, input_files);
   } else if(!format.compare(text_dumper::format)) {
     out_header.write(out);
     text_writer writer;
-    do_merge<text_reader, text_writer>(files, out, writer, min, max);
+    do_merge<text_reader, text_writer>(files, out, writer, min, max, input_files);
   } else {
     throw MergeError(err::msg() << "Unknown format '" << format << "'");
   }
