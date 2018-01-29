@@ -79,9 +79,10 @@ void do_merge(cpp_array<file_info>& files, std::ostream& out, writer_type& write
     uint64_t sum = 0;
     do {
       std::cout << " testy file is: " << head->file_ << "   ";
+      std::cout << "key is: " << key << " value is: " << head->val_ << "\n";
       sum += head->val_;
       heap.pop();
-      if(head->it_->next())
+      if(head->it_->next() and sum==head->val_)
         heap.push(*head->it_);
       head = heap.head();
     } while(head->key_ == key && heap.is_not_empty());
