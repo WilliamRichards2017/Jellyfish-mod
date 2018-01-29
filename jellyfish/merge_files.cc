@@ -61,9 +61,6 @@ void do_merge(cpp_array<file_info>& files, std::ostream& out, writer_type& write
   for(size_t i = 0; i < files.size(); ++i) {
     readers.init(i, files[i].is, &files[i].header);
     //std::cout << "input file is: " << input_files[i] << "\n";
-
-
-
     if(readers[i].next()){
       readers[i].file_ = input_files[i];
       std::cout << "printing readers[i].file_: " << readers[i].file_ << "\n";
@@ -74,23 +71,37 @@ void do_merge(cpp_array<file_info>& files, std::ostream& out, writer_type& write
 
   heap_item head = heap.head();
   mer_dna   key;
+  std::string file;
+  min = 13;
+  std::ofstream jellyUniqueHash;
+  jellyUniqueHash.open("jellyUniqueHash.txt");
   while(heap.is_not_empty()) {
+    file = head->file_;
     key = head->key_;
-    uint64_t sum = 0;
+    std::vector<uint64_t> sum;
     do {
-      std::cout << " testy file is: " << head->file_ << "   ";
-      std::cout << "key is: " << key << " value is: " << head->val_ << "\n";
-      sum += head->val_;
+      sum.push_back(head->val_);
       heap.pop();
-      if(head->it_->next() and sum==head->val_)
+      if(head->it_->next())
         heap.push(*head->it_);
       head = heap.head();
     } while(head->key_ == key && heap.is_not_empty());
-    if(sum >= min && sum <= max) {
-      std::cout << "key is: " << key << " , sum is: " << sum << "value is " << head->val_ <<  "\n";
+        
+    if (sum.size() ==1) {
+	if (sum[0] >= min and sum[0] < 300 and file.compare("Child.generator.Jhash")==0) {
+	    std::cout << key <<'\t' << sum[0] << '\t' << file << '\n';
+	    jellyUniqueHash << key << ", " << sum[0] << ", " << file << "\n";
+	  }
+      }
+    /*if(sum >= min && sum <= max) {
+      if(sum==head->val_ and head->file_.compare("Child.generator.Jhash")==0) {
+      //std::cout << "key is: " << key << " , sum is: " << sum << "value is " << head->val_ << "  "  << "file origin is: " << head->file_ << "\n";
+
       writer.write(out, key, sum);
-    }
+      }
+      }*/
   }
+  jellyUniqueHash.close();
 }
 
 // Merge files. Throws an error if unsuccessful.
