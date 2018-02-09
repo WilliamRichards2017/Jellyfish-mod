@@ -89,7 +89,7 @@ void do_merge(cpp_array<file_info>& files, std::ostream& out, writer_type& write
         
     if (sum.size() ==1) {
 	if (sum[0] >= min and sum[0] < 300 and file.compare("Child.generator.Jhash")==0) {
-	    std::cout << key <<'\t' << sum[0] << '\t' << file << '\n';
+	    std::cout << key <<'\t' << sum[0] << std::endl;
 	    jellyUniqueHash << key << ", " << sum[0] << ", " << file << "\n";
 	  }
       }
