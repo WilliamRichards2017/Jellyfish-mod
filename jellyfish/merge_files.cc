@@ -52,7 +52,7 @@ typedef std::auto_ptr<RectangularBinaryMatrix> matrix_ptr;
 
 template<typename reader_type, typename writer_type>
 void do_merge(cpp_array<file_info>& files, std::ostream& out, writer_type& writer,
-              uint64_t min, uint64_t max, std::vector<const char*> input_files) {
+              uint64_t min, uint64_t max, std::vector<const char*> input_files, int cutoff, const char * proband) {
   cpp_array<reader_type> readers(files.size());
   typedef jellyfish::mer_heap::heap<mer_dna, reader_type> heap_type;
   typedef typename heap_type::const_item_t heap_item;
@@ -63,8 +63,8 @@ void do_merge(cpp_array<file_info>& files, std::ostream& out, writer_type& write
     //std::cout << "input file is: " << input_files[i] << "\n";
     if(readers[i].next()){
       readers[i].file_ = input_files[i];
-      std::cout << "printing readers[i].file_: " << readers[i].file_ << "\n";
-      std::cout << "files[i].is: " << files[i].is << "  &files[i].header is: " << files[i].header << "File origin is: " << readers[i].file_ << "\n";
+      //std::cout << "printing readers[i].file_: " << readers[i].file_ << "\n";
+      //std::cout << "files[i].is: " << files[i].is << "  &files[i].header is: " << files[i].header << "File origin is: " << readers[i].file_ << "\n";
       heap.push(readers[i]);
     }
   }
@@ -72,9 +72,6 @@ void do_merge(cpp_array<file_info>& files, std::ostream& out, writer_type& write
   heap_item head = heap.head();
   mer_dna   key;
   std::string file;
-  min = 13;
-  std::ofstream jellyUniqueHash;
-  jellyUniqueHash.open("jellyUniqueHash.txt");
   while(heap.is_not_empty()) {
     file = head->file_;
     key = head->key_;
@@ -88,27 +85,18 @@ void do_merge(cpp_array<file_info>& files, std::ostream& out, writer_type& write
     } while(head->key_ == key && heap.is_not_empty());
         
     if (sum.size() ==1) {
-	if (sum[0] >= min and sum[0] < 300 and file.compare("Child.generator.Jhash")==0) {
+	if (sum[0] >= cutoff and sum[0] < 300 and file.compare("Child.generator.Jhash")==0) {
 	    std::cout << key <<'\t' << sum[0] << std::endl;
-	    jellyUniqueHash << key << ", " << sum[0] << ", " << file << "\n";
 	  }
       }
-    /*if(sum >= min && sum <= max) {
-      if(sum==head->val_ and head->file_.compare("Child.generator.Jhash")==0) {
-      //std::cout << "key is: " << key << " , sum is: " << sum << "value is " << head->val_ << "  "  << "file origin is: " << head->file_ << "\n";
-
-      writer.write(out, key, sum);
-      }
-      }*/
   }
-  jellyUniqueHash.close();
 }
 
 // Merge files. Throws an error if unsuccessful.
 void merge_files(std::vector<const char*> input_files,
                  const char* out_file,
                  file_header& out_header,
-                 uint64_t min, uint64_t max) {
+                 uint64_t min, uint64_t max, int cutoff, const char * proband) {
   unsigned int key_len            = 0;
   size_t       max_reprobe_offset = 0;
   size_t       size               = 0;
@@ -166,11 +154,11 @@ void merge_files(std::vector<const char*> input_files,
     out_header.counter_len(out_counter_len);
     out_header.write(out);
     binary_writer writer(out_counter_len, key_len);
-    do_merge<binary_reader, binary_writer>(files, out, writer, min, max, input_files);
+    do_merge<binary_reader, binary_writer>(files, out, writer, min, max, input_files, cutoff, proband);
   } else if(!format.compare(text_dumper::format)) {
     out_header.write(out);
     text_writer writer;
-    do_merge<text_reader, text_writer>(files, out, writer, min, max, input_files);
+    do_merge<text_reader, text_writer>(files, out, writer, min, max, input_files, cutoff, proband);
   } else {
     throw MergeError(err::msg() << "Unknown format '" << format << "'");
   }

@@ -328,8 +328,9 @@ int count_main(int argc, char *argv[])
         std::vector<const char*> files = dumper->file_names_cstr();
         uint64_t min = args.lower_count_given ? args.lower_count_arg : 0;
         uint64_t max = args.upper_count_given ? args.upper_count_arg : std::numeric_limits<uint64_t>::max();
+	const char * proband = new char(0);
         try {
-          merge_files(files, args.output_arg, header, min, max);
+          merge_files(files, args.output_arg, header, min, max, 0, proband);
         } catch(MergeError e) {
           err::die(err::msg() << e.what());
         }

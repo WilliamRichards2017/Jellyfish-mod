@@ -27,12 +27,15 @@ int merge_main(int argc, char *argv[])
   out_header.fill_standard();
   out_header.set_cmdline(argc, argv);
 
+  int cutoff = atoi(argv[1]);
+  const char * proband = argv[2];
+
   merge_main_cmdline args(argc, argv);
   uint64_t min = args.lower_count_given ? args.lower_count_arg : 0;
   uint64_t max = args.upper_count_given ? args.upper_count_arg : std::numeric_limits<uint64_t>::max();
 
   try {
-    merge_files(args.input_arg, args.output_arg, out_header, min, max);
+    merge_files(args.input_arg, args.output_arg, out_header, min, max, cutoff, proband);
   } catch(MergeError e) {
     err::die(err::msg() << e.what());
   }
