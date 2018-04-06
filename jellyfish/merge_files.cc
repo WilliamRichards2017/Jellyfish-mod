@@ -105,15 +105,16 @@ void merge_files(std::vector<const char*> input_files,
   matrix_ptr   matrix;
   std::string file;
 
+  input_files.erase(input_files.begin());
   cpp_array<file_info> files(input_files.size());
 
   // create an iterator for each hash file
   for(size_t i = 0; i < files.size(); i++) {
     files.init(i, input_files[i]);
     //std::cout << "input file is: " << input_files[i] << "\n";
-    if(!files[i].is.good())
-      //throw MergeError(err::msg() << "Failed to open input file '" << input_files[i] << "'");
+    if(!files[i].is.good()) {
       continue;
+    }
 
     file_header& h = files[i].header;
     h.file_ = input_files[i];
