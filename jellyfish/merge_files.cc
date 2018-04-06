@@ -112,7 +112,8 @@ void merge_files(std::vector<const char*> input_files,
     files.init(i, input_files[i]);
     //std::cout << "input file is: " << input_files[i] << "\n";
     if(!files[i].is.good())
-      throw MergeError(err::msg() << "Failed to open input file '" << input_files[i] << "'");
+      //throw MergeError(err::msg() << "Failed to open input file '" << input_files[i] << "'");
+      continue;
 
     file_header& h = files[i].header;
     h.file_ = input_files[i];
