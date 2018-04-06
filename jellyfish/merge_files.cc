@@ -85,7 +85,7 @@ void do_merge(cpp_array<file_info>& files, std::ostream& out, writer_type& write
     } while(head->key_ == key && heap.is_not_empty());
         
     if (sum.size() ==1) {
-	if (sum[0] >= cutoff and sum[0] < 300 and file.compare("Child.generator.Jhash")==0) {
+	if (sum[0] >= cutoff and sum[0] < 300 and file.compare(proband)==0) {
 	    std::cout << key <<'\t' << sum[0] << std::endl;
 	  }
       }
